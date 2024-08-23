@@ -21,7 +21,7 @@ if __name__ == '__main__':
     atom_pos_Si = Supercell(atom_pos_Si, structure_info['lattice_vector'], supercell)
     atom_pos_O = Supercell(atom_pos_O, structure_info['lattice_vector'], supercell)
 
-    pair_dist = distance.pdist(atom_pos_Si)
+    pair_dist = distance.pdist(atom_pos_O)
     # pair_dist = distance.cdist(atom_pos_Si,atom_pos_O)  # 计算原子间的距离
     # dists = distance.squareform(dists)  # 将距离向量转换为距离矩阵
     # print(dists.reshape(-1))
@@ -40,10 +40,12 @@ if __name__ == '__main__':
     r_cutoff = 10
     dr = 0.1
 
-    PCF, bin = np.histogram(pair_dist, bins=int(r_cutoff / dr), range=(0, r_cutoff))
+    RDF, bin = np.histogram(pair_dist, bins=int(r_cutoff / dr), range=(0, r_cutoff))
     r = (bin[:-1] + bin[1:]) / 2.0  # 计算PCF的横坐标
 
-    plt.plot(r, PCF)
+    np.savetxt('D:/PhD_research/Jingfang Pei/Solution-processed IC/Simulation/RDF_O.txt', np.array([r, RDF]).T)
+
+    plt.plot(r, RDF)
 
     plt.show(block=True)
 
