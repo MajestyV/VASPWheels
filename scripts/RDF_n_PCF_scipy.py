@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial import distance
 import matplotlib.pyplot as plt
-from src import GetStructure
+from src import GetStructure, Supercell
 # from mda.mdio import write, read
 
 if __name__ == '__main__':
@@ -13,11 +13,19 @@ if __name__ == '__main__':
 
     # print(structure_info['atom'])  # 输出原子种类信息
 
+    atom_pos_Si = structure_info['atom_pos_Si']  # 提取原子坐标信息
     atom_pos_O = structure_info['atom_pos_O']  # 提取原子坐标信息
 
-    dists = distance.pdist(atom_pos_O)
+    supercell = (3,3,3)
+
+    atom_pos_Si = Supercell(atom_pos_Si, structure_info['lattice_vector'], supercell)
+    atom_pos_O = Supercell(atom_pos_O, structure_info['lattice_vector'], supercell)
+
+    pair_dist = distance.pdist(atom_pos_Si)
+    # pair_dist = distance.cdist(atom_pos_Si,atom_pos_O)  # 计算原子间的距离
     # dists = distance.squareform(dists)  # 将距离向量转换为距离矩阵
-    print(dists)
+    # print(dists.reshape(-1))
+    pair_dist = pair_dist.reshape(-1)
 
     # 读取分子坐标文件
     # traj = read('trajectory.xtc')
@@ -30,9 +38,9 @@ if __name__ == '__main__':
     # rdf = np.histogram(dists, bins=200, range=[0, 10])[0]
 
     r_cutoff = 10
-    dr = 0.05
+    dr = 0.1
 
-    PCF, bin = np.histogram(dists, bins=int(r_cutoff / dr), range=(0, r_cutoff))
+    PCF, bin = np.histogram(pair_dist, bins=int(r_cutoff / dr), range=(0, r_cutoff))
     r = (bin[:-1] + bin[1:]) / 2.0  # 计算PCF的横坐标
 
     plt.plot(r, PCF)

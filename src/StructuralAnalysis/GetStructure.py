@@ -79,9 +79,11 @@ class GetStructure:
 
         scaling = self.GrepLineContent(POSCAR, 2)  # 缩放尺度
 
-        lattice_vector = np.array([self.GrepLineContent(POSCAR, 3),  # 晶格向量
-                                   self.GrepLineContent(POSCAR, 4),
-                                   self.GrepLineContent(POSCAR, 5)])
+        lattice_vector = np.array([list(map(float,self.GrepLineContent(POSCAR, 3).split())),  # 晶格向量
+                                   list(map(float,self.GrepLineContent(POSCAR, 4).split())),
+                                   list(map(float,self.GrepLineContent(POSCAR, 5).split()))])
+
+        # print(list(map(float,self.GrepLineContent(POSCAR, 3).split())))
 
         atom_species = self.GrepLineContent(POSCAR, 6).split()  # 原子种类
         num_atom = self.GrepLineContent(POSCAR, 7).split()  # 每个原子种类分别的原子数
@@ -92,6 +94,12 @@ class GetStructure:
 
         atom_pos_DF = pd.read_csv(POSCAR, header=None, skiprows=8, sep='\s+', nrows=num_atom_tot)  # 分块读取
         atom_pos = atom_pos_DF.values  # DataFrame格式的数据转换为array格式
+        for i in range(num_atom_tot):
+            # print(atom_pos[i].reshape(1,-1))
+            atom_pos_real = np.dot(atom_pos[i].reshape(1,-1),lattice_vector)  # 将原子分数坐标转换为实空间坐标
+            # print(atom_pos_real)
+            atom_pos[i] = atom_pos_real[0]
+        # atom_pos = np.array([atom_pos[i]*lattice_vector for i in range(num_atom_tot)])  # 将原子分数坐标转换为实空间坐标
 
         structure_info = dict()  # 创建结构信息字典用于保存数据
         # 基本信息
